@@ -21,8 +21,12 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  return {
+    width,
+    height,
+    getArea: () => width * height,
+  };
 }
 
 
@@ -36,8 +40,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -52,8 +56,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = Object.create(proto);
+  obj.constructor(...Object.values(JSON.parse(json)));
+  return obj;
 }
 
 
@@ -112,32 +118,56 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
+  selector: '',
+  element(value) {
+    this.selector += `${value}`;
     throw new Error('Not implemented');
+    // return this;
   },
 
-  id(/* value */) {
+  id(value) {
+    this.selector += `#${value}`;
     throw new Error('Not implemented');
+    // return this;
   },
 
-  class(/* value */) {
+  class(value) {
+    this.selector += `.${value}`;
     throw new Error('Not implemented');
+    // return this;
   },
 
-  attr(/* value */) {
+  attr(value) {
+    this.selector += `[${value}]`;
     throw new Error('Not implemented');
+    // return this;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.selector += `:${value}`;
+    return this;
   },
 
-  pseudoElement(/* value */) {
+  pseudoElement(value) {
+    this.selector += `::${value}`;
     throw new Error('Not implemented');
+    // return this;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
+  combine(selector1, combinator, selector2) {
+    // console.log(selector1, combinator, selector2, 'selector1, combinator, selector2')
+    const first = selector1.stringify();
+    const second = selector2.stringify();
+    this.selector = first + combinator + second;
     throw new Error('Not implemented');
+    // return this;
+  },
+
+  stringify() {
+    // const { selector } = this;
+    this.selector = '';
+    throw new Error('Not implemented');
+    // return selector;
   },
 };
 
