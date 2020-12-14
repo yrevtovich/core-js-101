@@ -119,58 +119,109 @@ function fromJSON(proto, json) {
 
 const cssSelectorBuilder = {
   selector: '',
+  arr: [],
+  order: ['element', 'id', 'class', 'attr', 'pseudoCl', 'pseudoEl'],
+  selectorRepeatErr: 'Element, id and pseudo-element should not occur more then one time inside the selector',
+  selectorOrderErr: 'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element',
+
+  copyObject(a) {
+    const obj = Object.create(a);
+    obj.arr = [...a.arr];
+    return obj;
+  },
+
   element(value) {
-    this.selector += `${value}`;
-    throw new Error('Not implemented');
-    // return this;
+    if (this.arr.includes('element')) {
+      throw new Error(this.selectorRepeatErr);
+    }
+
+    if (this.arr.length) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('element');
+    obj.selector += `${value}`;
+    return obj;
   },
 
   id(value) {
-    this.selector += `#${value}`;
-    throw new Error('Not implemented');
-    // return this;
+    if (this.arr.includes('id')) {
+      throw new Error(this.selectorRepeatErr);
+    }
+
+    if (!this.arr.every((item) => this.order.indexOf(item) < this.order.indexOf('id'))) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('id');
+    obj.selector += `#${value}`;
+    return obj;
   },
 
   class(value) {
-    this.selector += `.${value}`;
-    throw new Error('Not implemented');
-    // return this;
+    if (!this.arr.every((item) => this.order.indexOf(item) <= this.order.indexOf('class'))) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('class');
+    obj.selector += `.${value}`;
+    return obj;
   },
 
   attr(value) {
-    this.selector += `[${value}]`;
-    throw new Error('Not implemented');
-    // return this;
+    if (!this.arr.every((item) => this.order.indexOf(item) <= this.order.indexOf('attr'))) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('attr');
+    obj.selector += `[${value}]`;
+    return obj;
   },
 
   pseudoClass(value) {
-    this.selector += `:${value}`;
-    return this;
+    if (!this.arr.every((item) => this.order.indexOf(item) <= this.order.indexOf('pseudoCl'))) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('pseudoCl');
+    obj.selector += `:${value}`;
+    return obj;
   },
 
   pseudoElement(value) {
-    this.selector += `::${value}`;
-    throw new Error('Not implemented');
-    // return this;
+    if (this.arr.includes('pseudoEl')) {
+      throw new Error(this.selectorRepeatErr);
+    }
+
+    if (!this.arr.every((item) => this.order.indexOf(item) < this.order.indexOf('pseudoEl'))) {
+      throw new Error(this.selectorOrderErr);
+    }
+
+    const obj = this.copyObject(this);
+    obj.arr.push('pseudoEl');
+    obj.selector += `::${value}`;
+    return obj;
   },
 
   combine(selector1, combinator, selector2) {
-    // console.log(selector1, combinator, selector2, 'selector1, combinator, selector2')
+    const obj = this.copyObject(this);
     const first = selector1.stringify();
     const second = selector2.stringify();
-    this.selector = first + combinator + second;
-    throw new Error('Not implemented');
-    // return this;
+    obj.selector = `${first} ${combinator} ${second}`;
+
+    return obj;
   },
 
   stringify() {
-    // const { selector } = this;
-    this.selector = '';
-    throw new Error('Not implemented');
-    // return selector;
+    const { selector } = this;
+    return selector;
   },
 };
-
 
 module.exports = {
   Rectangle,
